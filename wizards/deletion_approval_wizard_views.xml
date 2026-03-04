@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data>
+
+    <!-- ══════════════════════════════════════════════════════
+         DELETION APPROVAL WIZARD — FORM VIEW
+    ══════════════════════════════════════════════════════ -->
+    <record id="view_deletion_approval_wizard_form" model="ir.ui.view">
+      <field name="name">odosec.deletion.approval.wizard.form</field>
+      <field name="model">odosec.deletion.approval.wizard</field>
+      <field name="arch" type="xml">
+        <form string="Process Deletion Request">
+          <sheet>
+            <div class="oe_title">
+              <h2>Review Deletion Request</h2>
+            </div>
+
+            <!-- Request Info (readonly summary) -->
+            <group string="Request Summary">
+              <group>
+                <field name="deletion_request_id" readonly="1"/>
+                <field name="model_name"           readonly="1"/>
+                <field name="record_id"            readonly="1"/>
+              </group>
+              <group>
+                <field name="justification" readonly="1" nolabel="1"
+                       placeholder="No justification provided."/>
+              </group>
+            </group>
+
+            <!-- Record snapshot -->
+            <group string="Record Snapshot" invisible="not record_repr">
+              <field name="record_repr" readonly="1" nolabel="1" widget="code"/>
+            </group>
+
+            <!-- Decision -->
+            <group string="Your Decision" class="o_group_col_1">
+              <field name="decision" widget="radio"/>
+              <field name="decision_note"
+                     placeholder="Optional: add a note explaining your decision…"/>
+            </group>
+
+            <!-- Warning banner for approve -->
+            <div class="alert alert-danger" role="alert"
+                 invisible="decision != 'approve'">
+              <strong>⚠️ Warning:</strong> Approving will <b>permanently delete</b>
+              this record from the database. This action <b>cannot be undone</b>.
+            </div>
+          </sheet>
+          <footer>
+            <button name="action_confirm" type="object"
+                    string="Confirm Decision"
+                    class="btn-primary"/>
+            <button string="Cancel" class="btn-secondary"
+                    special="cancel"/>
+          </footer>
+        </form>
+      </field>
+    </record>
+
+    <!-- ══════════════════════════════════════════════════════
+         ACTION to open wizard from deletion request
+    ══════════════════════════════════════════════════════ -->
+    <record id="action_odosec_deletion_approval_wizard" model="ir.actions.act_window">
+      <field name="name">Process Deletion Request</field>
+      <field name="res_model">odosec.deletion.approval.wizard</field>
+      <field name="view_mode">form</field>
+      <field name="view_id" ref="view_deletion_approval_wizard_form"/>
+      <field name="target">new</field>
+      <field name="context">{'active_id': active_id}</field>
+      <field name="binding_model_id" ref="model_odosec_deletion_request"/>
+      <field name="binding_view_types">list,form</field>
+      <field name="groups_id" eval="[(4, ref('base.group_system'))]"/>
+    </record>
+
+  </data>
+</odoo>

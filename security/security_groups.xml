@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         MODULE CATEGORY
+    ═══════════════════════════════════════════════════════════ -->
+    <record id="module_category_odosec" model="ir.module.category">
+      <field name="name">OdoSec Plus</field>
+      <field name="description">Enterprise Odoo Security Suite</field>
+      <field name="sequence">100</field>
+    </record>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         ROLE: VIEWER  (read-only access to audit logs & dashboard)
+    ═══════════════════════════════════════════════════════════ -->
+    <record id="group_odosec_viewer" model="res.groups">
+      <field name="name">OdoSec Viewer</field>
+      <field name="category_id" ref="module_category_odosec"/>
+      <field name="comment">
+        Read-only access to audit logs, scan results, and the
+        security health dashboard. Cannot trigger actions.
+      </field>
+    </record>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         ROLE: ANALYST  (viewer + run scans + create deletion requests)
+    ═══════════════════════════════════════════════════════════ -->
+    <record id="group_odosec_analyst" model="res.groups">
+      <field name="name">OdoSec Analyst</field>
+      <field name="category_id" ref="module_category_odosec"/>
+      <field name="implied_ids" eval="[(4, ref('group_odosec_viewer'))]"/>
+      <field name="comment">
+        Can run security scans, create deletion requests, view backup records,
+        and access all Viewer features.
+      </field>
+    </record>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         ROLE: ADMINISTRATOR  (analyst + trigger backups + approve deletions)
+    ═══════════════════════════════════════════════════════════ -->
+    <record id="group_odosec_admin" model="res.groups">
+      <field name="name">OdoSec Administrator</field>
+      <field name="category_id" ref="module_category_odosec"/>
+      <field name="implied_ids" eval="[(4, ref('group_odosec_analyst'))]"/>
+      <field name="comment">
+        Full OdoSec access: trigger backups, approve/reject deletion requests,
+        manage IP restriction rules, configure hardening parameters.
+        Note: Backup download still requires base.group_system (System Admin).
+      </field>
+    </record>
+
+  </data>
+</odoo>

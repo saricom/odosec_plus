@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data>
+
+    <!-- TREE -->
+    <record id="view_health_list" model="ir.ui.view">
+      <field name="name">odosec.security.health.list</field>
+      <field name="model">odosec.security.health</field>
+      <field name="arch" type="xml">
+        <list string="Security Health Snapshots" create="false"
+              decoration-danger="overall_risk == 'critical'"
+              decoration-warning="overall_risk == 'high'"
+              decoration-info="overall_risk == 'medium'"
+              decoration-success="overall_risk == 'low'">
+          <field name="computed_date" string="Computed At"/>
+          <field name="overall_risk" string="Risk Level" widget="badge"
+                 decoration-danger="overall_risk == 'critical'"
+                 decoration-warning="overall_risk == 'high'"
+                 decoration-info="overall_risk == 'medium'"
+                 decoration-success="overall_risk == 'low'"/>
+          <field name="risk_score" string="Score"/>
+          <field name="open_critical" string="Critical Findings"/>
+          <field name="open_high"     string="High Findings"/>
+          <field name="failed_logins_1h" string="Failed Logins (1h)"/>
+          <field name="backup_age_days"  string="Backup Age (d)"/>
+          <field name="pending_deletions" string="Pending Deletions"/>
+        </list>
+      </field>
+    </record>
+
+    <!-- FORM (Dashboard) -->
+    <record id="view_health_form" model="ir.ui.view">
+      <field name="name">odosec.security.health.form</field>
+      <field name="model">odosec.security.health</field>
+      <field name="arch" type="xml">
+        <form string="Security Health Dashboard" create="false">
+          <header>
+            <button name="action_compute_health" type="object"
+                    string="🔄 Refresh Dashboard" class="btn-primary"
+                    groups="odosec_plus.group_odosec_analyst"/>
+          </header>
+          <sheet>
+            <div class="oe_title">
+              <h1>Security Health Dashboard</h1>
+              <h2>
+                <span invisible="overall_risk != 'critical'" class="text-danger">🚨 CRITICAL RISK</span>
+                <span invisible="overall_risk != 'high'"     class="text-warning">🔴 HIGH RISK</span>
+                <span invisible="overall_risk != 'medium'"   class="text-info">⚠️ MEDIUM RISK</span>
+                <span invisible="overall_risk != 'low'"      class="text-success">✅ LOW RISK</span>
+              </h2>
+            </div>
+
+            <!-- Risk Score Summary Card -->
+            <div class="row mt16">
+              <div class="col-4">
+                <div class="o_stat_info">
+                  <field name="risk_score" class="o_stat_value"
+                         decoration-danger="risk_score &gt;= 50"
+                         decoration-warning="risk_score &gt;= 25"/>
+                  <span class="o_stat_text">Risk Score</span>
+                </div>
+              </div>
+              <div class="col-4">
+                <div class="o_stat_info">
+                  <field name="open_critical" class="o_stat_value"/>
+                  <span class="o_stat_text">Critical Findings</span>
+                </div>
+              </div>
+              <div class="col-4">
+                <div class="o_stat_info">
+                  <field name="failed_logins_1h" class="o_stat_value"/>
+                  <span class="o_stat_text">Failed Logins (1h)</span>
+                </div>
+              </div>
+            </div>
+
+            <notebook>
+              <page string="Overview" name="overview">
+                <group>
+                  <group string="Scan Findings">
+                    <field name="last_scan_id"   readonly="1"/>
+                    <field name="open_critical"  readonly="1"/>
+                    <field name="open_high"      readonly="1"/>
+                    <field name="models_exposed" readonly="1"/>
+                  </group>
+                  <group string="Authentication">
+                    <field name="failed_logins_1h"  readonly="1"/>
+                    <field name="failed_logins_24h" readonly="1"/>
+                    <field name="total_logs_today"  readonly="1"/>
+                    <field name="locked_accounts"   readonly="1"/>
+                  </group>
+                </group>
+                <group>
+                  <group string="Backup Status">
+                    <field name="last_backup_date" readonly="1"/>
+                    <field name="backup_age_days"  readonly="1"/>
+                    <field name="backup_risk"      readonly="1" widget="badge"
+                           decoration-success="backup_risk == 'ok'"
+                           decoration-warning="backup_risk == 'warn'"
+                           decoration-danger="backup_risk == 'danger'"/>
+                  </group>
+                  <group string="Governance">
+                    <field name="pending_deletions" readonly="1"/>
+                    <field name="computed_date"     readonly="1"/>
+                  </group>
+                </group>
+              </page>
+              <page string="Risk Summary" name="summary">
+                <field name="summary" readonly="1" nolabel="1" widget="code"/>
+              </page>
+            </notebook>
+          </sheet>
+        </form>
+      </field>
+    </record>
+
+    <!-- SERVER ACTION: Refresh Health -->
+    <record id="action_odosec_refresh_health" model="ir.actions.server">
+      <field name="name">OdoSec Plus: Refresh Security Health</field>
+      <field name="model_id" ref="model_odosec_security_health"/>
+      <field name="binding_model_id" ref="model_odosec_security_health"/>
+      <field name="state">code</field>
+      <field name="code">
+snapshot = model.action_compute_health()
+action = {
+    'type': 'ir.actions.act_window',
+    'res_model': 'odosec.security.health',
+    'res_id': snapshot.id,
+    'view_mode': 'form',
+    'target': 'current',
+}
+      </field>
+      <field name="groups_id" eval="[(4, ref('odosec_plus.group_odosec_analyst'))]"/>
+    </record>
+
+    <!-- WINDOW ACTION -->
+    <record id="action_odosec_health" model="ir.actions.act_window">
+      <field name="name">Security Health Dashboard</field>
+      <field name="res_model">odosec.security.health</field>
+      <field name="view_mode">list,form</field>
+      <field name="context">{'create': False}</field>
+    </record>
+
+    <!-- IP RESTRICTION VIEWS -->
+    <record id="view_ip_restriction_list" model="ir.ui.view">
+      <field name="name">odosec.ip.restriction.list</field>
+      <field name="model">odosec.ip.restriction</field>
+      <field name="arch" type="xml">
+        <list string="IP Restriction Rules"
+              decoration-danger="rule_type == 'block'"
+              decoration-success="rule_type == 'allow'">
+          <field name="sequence" widget="handle"/>
+          <field name="name"/>
+          <field name="ip_range" string="IP / CIDR"/>
+          <field name="rule_type" widget="badge"
+                 decoration-danger="rule_type == 'block'"
+                 decoration-success="rule_type == 'allow'"/>
+          <field name="scope"/>
+          <field name="active" widget="boolean_toggle"/>
+        </list>
+      </field>
+    </record>
+
+    <record id="view_ip_restriction_form" model="ir.ui.view">
+      <field name="name">odosec.ip.restriction.form</field>
+      <field name="model">odosec.ip.restriction</field>
+      <field name="arch" type="xml">
+        <form string="IP Restriction Rule">
+          <sheet>
+            <group>
+              <group>
+                <field name="name"/>
+                <field name="ip_range"/>
+                <field name="rule_type"/>
+                <field name="sequence"/>
+                <field name="active" widget="boolean_toggle"/>
+              </group>
+              <group>
+                <field name="scope"/>
+                <field name="group_ids" widget="many2many_tags"
+                       invisible="scope != 'group'"/>
+                <field name="user_ids"  widget="many2many_tags"
+                       invisible="scope != 'users'"/>
+              </group>
+            </group>
+            <group string="Notes">
+              <field name="notes" nolabel="1"/>
+            </group>
+          </sheet>
+        </form>
+      </field>
+    </record>
+
+    <record id="action_odosec_ip_restriction" model="ir.actions.act_window">
+      <field name="name">IP Restriction Rules</field>
+      <field name="res_model">odosec.ip.restriction</field>
+      <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- RATE LIMITER VIEWS -->
+    <record id="view_rate_limiter_list" model="ir.ui.view">
+      <field name="name">odosec.rate.limiter.list</field>
+      <field name="model">odosec.rate.limiter</field>
+      <field name="arch" type="xml">
+        <list string="Login Rate Limits" create="false"
+              decoration-danger="is_locked">
+          <field name="login"/>
+          <field name="ip_address"/>
+          <field name="attempts"/>
+          <field name="last_attempt"/>
+          <field name="locked_until"/>
+          <field name="is_locked" widget="boolean" string="Locked"/>
+          <button name="action_unlock" type="object"
+                  string="Unlock" class="btn-warning"
+                  groups="base.group_system"/>
+        </list>
+      </field>
+    </record>
+
+    <record id="action_odosec_rate_limiter" model="ir.actions.act_window">
+      <field name="name">Login Rate Limits</field>
+      <field name="res_model">odosec.rate.limiter</field>
+      <field name="view_mode">list</field>
+      <field name="context">{'create': False}</field>
+    </record>
+
+  </data>
+</odoo>

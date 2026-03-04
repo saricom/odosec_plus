@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data>
+
+    <!-- TREE -->
+    <record id="view_del_req_list" model="ir.ui.view">
+      <field name="name">odosec.deletion.request.list</field>
+      <field name="model">odosec.deletion.request</field>
+      <field name="arch" type="xml">
+        <list string="Deletion Requests"
+              decoration-warning="state == 'pending'"
+              decoration-danger="state == 'approved'"
+              decoration-success="state == 'rejected'"
+              decoration-muted="state == 'draft'">
+          <field name="name" string="Reference"/>
+          <field name="model_display" string="Target Model"/>
+          <field name="record_id" string="Record ID"/>
+          <field name="requested_by" string="Requested By"/>
+          <field name="urgency" string="Urgency" widget="badge"
+                 decoration-danger="urgency == 'critical'"
+                 decoration-warning="urgency == 'high'"/>
+          <field name="state" string="Status" widget="badge"
+                 decoration-warning="state == 'pending'"
+                 decoration-danger="state == 'approved'"
+                 decoration-success="state == 'rejected'"/>
+          <field name="create_date" string="Created"/>
+          <field name="decision_date" string="Decision Date" optional="hide"/>
+        </list>
+      </field>
+    </record>
+
+    <!-- FORM -->
+    <record id="view_del_req_form" model="ir.ui.view">
+      <field name="name">odosec.deletion.request.form</field>
+      <field name="model">odosec.deletion.request</field>
+      <field name="arch" type="xml">
+        <form string="Deletion Request">
+          <header>
+            <button name="action_submit" type="object"
+                    string="Submit for Approval" class="btn-primary"
+                    invisible="state != 'draft'"/>
+            <button name="action_approve" type="object"
+                    string="✅ Approve &amp; Execute Deletion"
+                    class="btn-danger"
+                    invisible="state != 'pending'"
+                    groups="base.group_system"
+                    confirm="This will permanently delete the record. This action cannot be undone. Are you sure?"/>
+            <button name="action_reject" type="object"
+                    string="❌ Reject"
+                    class="btn-secondary"
+                    invisible="state not in ('pending', 'draft')"
+                    groups="base.group_system"/>
+            <field name="state" widget="statusbar"
+                   statusbar_visible="draft,pending,approved,rejected"/>
+          </header>
+          <sheet>
+            <div class="oe_title">
+              <h1><field name="name" readonly="1"/></h1>
+            </div>
+            <group>
+              <group string="Request Details">
+                <field name="model_name"   readonly="1"/>
+                <field name="model_display" readonly="1"/>
+                <field name="record_id"    readonly="1"/>
+                <field name="urgency"
+                       readonly="state != 'draft'"/>
+                <field name="requested_by" readonly="1"/>
+              </group>
+              <group string="Decision">
+                <field name="approved_by"   readonly="1"
+                       invisible="state not in ('approved','rejected')"/>
+                <field name="decision_date" readonly="1"
+                       invisible="state not in ('approved','rejected')"/>
+                <field name="decision_note"
+                       readonly="state in ('approved','rejected')"/>
+              </group>
+            </group>
+            <group string="Business Justification">
+              <field name="justification" nolabel="1"
+                     readonly="state != 'draft'"/>
+            </group>
+            <group string="Record Snapshot" invisible="not record_repr">
+              <field name="record_repr" readonly="1" nolabel="1" widget="code"/>
+            </group>
+          </sheet>
+          <chatter/>
+        </form>
+      </field>
+    </record>
+
+    <!-- SEARCH -->
+    <record id="view_del_req_search" model="ir.ui.view">
+      <field name="name">odosec.deletion.request.search</field>
+      <field name="model">odosec.deletion.request</field>
+      <field name="arch" type="xml">
+        <search string="Search Deletion Requests">
+          <field name="name" string="Reference"/>
+          <field name="model_name" string="Model"/>
+          <field name="requested_by" string="Requested By"/>
+          <filter name="f_pending"  string="Pending Approval"
+                  domain="[('state','=','pending')]"/>
+          <filter name="f_draft"    string="Draft"
+                  domain="[('state','=','draft')]"/>
+          <filter name="f_approved" string="Approved"
+                  domain="[('state','=','approved')]"/>
+          <filter name="f_rejected" string="Rejected"
+                  domain="[('state','=','rejected')]"/>
+          <separator/>
+          <filter name="f_critical" string="Critical Urgency"
+                  domain="[('urgency','=','critical')]"/>
+          <group string="Group By">
+            <filter name="gb_state"  string="Status"
+                    context="{'group_by': 'state'}"/>
+            <filter name="gb_model"  string="Target Model"
+                    context="{'group_by': 'model_name'}"/>
+            <filter name="gb_user"   string="Requested By"
+                    context="{'group_by': 'requested_by'}"/>
+          </group>
+        </search>
+      </field>
+    </record>
+
+    <!-- ACTION -->
+    <record id="action_odosec_deletion_request" model="ir.actions.act_window">
+      <field name="name">Deletion Requests</field>
+      <field name="res_model">odosec.deletion.request</field>
+      <field name="view_mode">list,form</field>
+      <field name="search_view_id" ref="view_del_req_search"/>
+      <field name="context">{'search_default_f_pending': 1}</field>
+    </record>
+
+  </data>
+</odoo>

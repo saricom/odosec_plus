@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data>
+
+    <!-- ══════════════════════════════════════════════════════════
+         TOP-LEVEL MENU
+    ══════════════════════════════════════════════════════════ -->
+    <menuitem id="menu_odosec_root"
+              name="OdoSec Plus"
+              sequence="100"
+              groups="odosec_plus.group_odosec_viewer"
+              web_icon="odosec_plus,static/description/icon.png"/>
+
+    <!-- ══════════════════════════════════════════════════════════
+         DASHBOARD
+    ══════════════════════════════════════════════════════════ -->
+    <menuitem id="menu_odosec_dashboard"
+              name="Security Dashboard"
+              parent="menu_odosec_root"
+              action="action_odosec_health"
+              sequence="10"
+              groups="odosec_plus.group_odosec_viewer"/>
+
+    <!-- ══════════════════════════════════════════════════════════
+         AUDIT SECTION
+    ══════════════════════════════════════════════════════════ -->
+    <menuitem id="menu_odosec_audit_section"
+              name="Audit Trail"
+              parent="menu_odosec_root"
+              sequence="20"
+              groups="odosec_plus.group_odosec_viewer"/>
+
+    <menuitem id="menu_odosec_audit_logs"
+              name="Audit Logs"
+              parent="menu_odosec_audit_section"
+              action="action_odosec_audit_log"
+              sequence="10"
+              groups="odosec_plus.group_odosec_viewer"/>
+
+    <!-- ══════════════════════════════════════════════════════════
+         BACKUP SECTION
+    ══════════════════════════════════════════════════════════ -->
+    <menuitem id="menu_odosec_backup_section"
+              name="Backup"
+              parent="menu_odosec_root"
+              sequence="30"
+              groups="odosec_plus.group_odosec_admin"/>
+
+    <menuitem id="menu_odosec_backup"
+              name="Backup Manager"
+              parent="menu_odosec_backup_section"
+              action="action_odosec_backup"
+              sequence="10"
+              groups="odosec_plus.group_odosec_admin"/>
+
+    <!-- ══════════════════════════════════════════════════════════
+         GOVERNANCE SECTION
+    ══════════════════════════════════════════════════════════ -->
+    <menuitem id="menu_odosec_governance_section"
+              name="Deletion Governance"
+              parent="menu_odosec_root"
+              sequence="40"
+              groups="odosec_plus.group_odosec_analyst"/>
+
+    <menuitem id="menu_odosec_deletion"
+              name="Deletion Requests"
+              parent="menu_odosec_governance_section"
+              action="action_odosec_deletion_request"
+              sequence="10"
+              groups="odosec_plus.group_odosec_analyst"/>
+
+    <!-- ══════════════════════════════════════════════════════════
+         SECURITY SECTION
+    ══════════════════════════════════════════════════════════ -->
+    <menuitem id="menu_odosec_security_section"
+              name="Vulnerability Scanner"
+              parent="menu_odosec_root"
+              sequence="50"
+              groups="odosec_plus.group_odosec_analyst"/>
+
+    <menuitem id="menu_odosec_scans"
+              name="Security Scans"
+              parent="menu_odosec_security_section"
+              action="action_odosec_security_scan"
+              sequence="10"
+              groups="odosec_plus.group_odosec_analyst"/>
+
+    <!-- ══════════════════════════════════════════════════════════
+         CONFIGURATION SECTION (Admin only)
+    ══════════════════════════════════════════════════════════ -->
+    <menuitem id="menu_odosec_config_section"
+              name="Configuration"
+              parent="menu_odosec_root"
+              sequence="90"
+              groups="base.group_system"/>
+
+    <menuitem id="menu_odosec_ip_rules"
+              name="IP Restriction Rules"
+              parent="menu_odosec_config_section"
+              action="action_odosec_ip_restriction"
+              sequence="10"
+              groups="base.group_system"/>
+
+    <menuitem id="menu_odosec_rate_limits"
+              name="Login Rate Limits"
+              parent="menu_odosec_config_section"
+              action="action_odosec_rate_limiter"
+              sequence="20"
+              groups="base.group_system"/>
+
+  </data>
+</odoo>
